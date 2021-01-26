@@ -203,7 +203,8 @@ bool
 EventQueue::parent_requests_shutdown() const
 {
     char ch;
-    return m_parentStream.try_read_char(ch) && ch == ShutdownCh;
+    //return m_parentStream.try_read_char(ch) && ch == ShutdownCh;
+    return false;
 }
 
 bool
