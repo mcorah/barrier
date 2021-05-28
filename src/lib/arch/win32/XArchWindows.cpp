@@ -25,7 +25,7 @@
 //
 
 std::string
-XArchEvalWindows::eval() const throw()
+XArchEvalWindows::eval() const noexcept
 {
     char* cmsg;
     if (FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
@@ -51,7 +51,7 @@ XArchEvalWindows::eval() const throw()
 //
 
 std::string
-XArchEvalWinsock::eval() const throw()
+XArchEvalWinsock::eval() const noexcept
 {
     // built-in windows function for looking up error message strings
     // may not look up network error messages correctly.  we'll have

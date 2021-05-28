@@ -33,6 +33,8 @@ set B_QT_FULLPATH=%B_QT_ROOT%\%B_QT_VER%\%B_QT_MSVC%
 echo Bonjour: %BONJOUR_SDK_HOME%
 echo Qt: %B_QT_FULLPATH%
 
+git submodule update --init --recursive
+
 rmdir /q /s build
 mkdir build
 if ERRORLEVEL 1 goto failed
@@ -50,6 +52,8 @@ if exist bin\Debug (
     copy %B_QT_FULLPATH%\bin\Qt5Cored.dll bin\Debug\ > NUL
     copy ..\ext\openssl\windows\x64\bin\* bin\Debug\ > NUL
     copy ..\res\openssl\barrier.conf bin\Debug\ > NUL
+    mkdir bin\Debug\platforms
+    copy %B_QT_FULLPATH%\plugins\platforms\qwindowsd.dll bin\Debug\platforms\ > NUL
 ) else if exist bin\Release (
     copy %B_QT_FULLPATH%\bin\Qt5Core.dll bin\Release\ > NUL
     copy %B_QT_FULLPATH%\bin\Qt5Gui.dll bin\Release\ > NUL
@@ -65,9 +69,11 @@ if exist bin\Debug (
 )
 
 echo Build completed successfully
+set BUILD_FAILED=0
 goto done
 
 :failed
+set BUILD_FAILED=%ERRORLEVEL%
 echo Build failed
 
 :done
@@ -82,3 +88,5 @@ set BONJOUR_SDK_HOME=
 set B_QT_FULLPATH=
 set savedir=
 set cmake_gen=
+
+EXIT /B %BUILD_FAILED%

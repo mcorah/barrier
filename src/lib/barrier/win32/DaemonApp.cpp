@@ -353,7 +353,10 @@ DaemonApp::handleIpcMessage(const Event& e, void*)
             LOG((CLOG_DEBUG "ipc hello, type=%s", type.c_str()));
 
             const char * serverstatus = m_watchdog->isProcessActive() ? "active" : "not active";
-            LOG((CLOG_INFO "server status: %s", serverstatus));
+
+            // using CLOG_PRINT here allows the GUI to see that the server status
+            // regardless of which log level is set
+            LOG((CLOG_PRINT "server status: %s", serverstatus));
 
             m_ipcLogOutputter->notifyBuffer();
             break;

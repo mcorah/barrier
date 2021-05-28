@@ -555,15 +555,18 @@ ServerApp::startServer()
         m_server->setListener(listener);
         m_listener = listener;
         updateStatus();
-        LOG((CLOG_NOTE "started server (%s), waiting for clients", family));
+
+        // using CLOG_PRINT here allows the GUI to see that the server is started
+        // regardless of which log level is set
+        LOG((CLOG_PRINT "started server (%s), waiting for clients", family));
         m_serverState = kStarted;
         return true;
     }
     catch (XSocketAddressInUse& e) {
-        LOG((CLOG_WARN "cannot listen for clients: %s", e.what()));
+        LOG((CLOG_ERR "cannot listen for clients: %s", e.what()));
         closeClientListener(listener);
         updateStatus(String("cannot listen for clients: ") + e.what());
-        retryTime = 10.0;
+        retryTime = 1.0;
     }
     catch (XBase& e) {
         LOG((CLOG_CRIT "failed to start server: %s", e.what()));
@@ -684,9 +687,9 @@ ServerApp::handleNoClients(const Event&, void*)
 void
 ServerApp::handleScreenSwitched(const Event& e, void*)
 {
-    Server::SwitchToScreenInfo* info = (Server::SwitchToScreenInfo*)(e.getData());
-
     #ifdef WINAPI_XWINDOWS
+        Server::SwitchToScreenInfo* info = (Server::SwitchToScreenInfo*)(e.getData());
+
         if (!args().m_screenChangeScript.empty()) {
             LOG((CLOG_INFO "Running shell script for screen \"%s\"", info->m_screen));
 

@@ -21,6 +21,7 @@
 #include "arch/Arch.h"
 #include "arch/IArchMultithread.h"
 #include "base/ILogOutputter.h"
+#include "base/String.h"
 #include "ipc/Ipc.h"
 
 #include <deque>
@@ -92,12 +93,12 @@ public:
 private:
     void                init();
     void                bufferThread(void*);
-    String                getChunk(size_t count);
-    void                appendBuffer(const String& text);
+    std::string getChunk(size_t count);
+    void appendBuffer(const std::string& text);
     bool                isRunning();
 
 private:
-    typedef std::deque<String> Buffer;
+    typedef std::deque<std::string> Buffer;
 
     IpcServer&            m_ipcServer;
     Buffer                m_buffer;

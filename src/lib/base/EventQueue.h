@@ -58,11 +58,9 @@ public:
     virtual void        removeHandlers(void* target);
     virtual Event::Type
                         registerTypeOnce(Event::Type& type, const char* name);
-    virtual bool        isEmpty() const;
     virtual IEventJob*    getHandler(Event::Type type, void* target) const;
     virtual const char*    getTypeName(Event::Type type);
-    virtual Event::Type
-                        getRegisteredType(const String& name) const;
+    virtual Event::Type getRegisteredType(const std::string& name) const;
     void*                getSystemTarget();
     virtual void        waitForReady() const;
 
@@ -108,7 +106,7 @@ private:
     typedef std::map<UInt32, Event> EventTable;
     typedef std::vector<UInt32> EventIDList;
     typedef std::map<Event::Type, const char*> TypeMap;
-    typedef std::map<String, Event::Type> NameMap;
+    typedef std::map<std::string, Event::Type> NameMap;
     typedef std::map<Event::Type, IEventJob*> TypeHandlerTable;
     typedef std::map<void*, TypeHandlerTable> HandlerTable;
 

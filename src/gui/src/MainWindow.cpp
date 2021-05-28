@@ -67,10 +67,17 @@ static const QString barrierConfigFilter(QObject::tr("Barrier Configurations (*.
 
 static const char* barrierIconFiles[] =
 {
+#if defined(Q_OS_MAC)
+    ":/res/icons/32x32/barrier-disconnected-mask.png",
+    ":/res/icons/32x32/barrier-disconnected-mask.png",
+    ":/res/icons/32x32/barrier-connected-mask.png",
+    ":/res/icons/32x32/barrier-transfering-mask.png"
+#else
     ":/res/icons/16x16/barrier-disconnected.png",
     ":/res/icons/16x16/barrier-disconnected.png",
     ":/res/icons/16x16/barrier-connected.png",
     ":/res/icons/16x16/barrier-transfering.png"
+#endif
 };
 
 static const char* barrierLargeIcon = ":/res/icons/256x256/barrier.ico";
@@ -288,8 +295,13 @@ void MainWindow::saveSettings()
 
 void MainWindow::setIcon(qBarrierState state)
 {
-    if (m_pTrayIcon)
-        m_pTrayIcon->setIcon(QIcon(barrierIconFiles[state]));
+    if (m_pTrayIcon) {
+        QIcon icon = QIcon(barrierIconFiles[state]);
+#if defined(Q_OS_MAC)
+        icon.setIsMask(true);
+#endif
+        m_pTrayIcon->setIcon(icon);
+    }
 }
 
 void MainWindow::trayActivated(QSystemTrayIcon::ActivationReason reason)
@@ -333,7 +345,9 @@ void MainWindow::logError()
 
 void MainWindow::appendLogInfo(const QString& text)
 {
-    m_pLogWindow->appendInfo(text);
+    if (appConfig().logLevel() >= 3) {
+        m_pLogWindow->appendInfo(text);
+    }
 }
 
 void MainWindow::appendLogDebug(const QString& text) {
@@ -524,10 +538,7 @@ void MainWindow::startBarrier()
 
     qDebug() << args;
 
-    // show command if debug log level...
-    if (appConfig().logLevel() >= 4) {
-        appendLogInfo(QString("command: %1 %2").arg(app, args.join(" ")));
-    }
+    appendLogDebug(QString("command: %1 %2").arg(app, args.join(" ")));
 
     appendLogInfo("config file: " + configFilename());
     appendLogInfo("log level: " + appConfig().logLevelText());
@@ -584,9 +595,7 @@ bool MainWindow::clientArgs(QStringList& args, QString& app)
             args << "[" + serverIp + "]:" + QString::number(appConfig().port());
             return true;
         }
-    }
-
-    if (m_pLineEditHostname->text().isEmpty()) {
+    } else if (m_pLineEditHostname->text().isEmpty()) {
         show();
         if (!m_SuppressEmptyServerWarning) {
             QMessageBox::warning(this, tr("Hostname is empty"),
@@ -944,6 +953,7 @@ void MainWindow::updateSSLFingerprint()
     }
     if (m_AppConfig->getCryptoEnabled() && Fingerprint::local().fileExists()) {
         m_pLabelLocalFingerprint->setText(Fingerprint::local().readFirst());
+        m_pLabelLocalFingerprint->setTextInteractionFlags(Qt::TextSelectableByMouse);
     } else {
         m_pLabelLocalFingerprint->setText("Disabled");
     }

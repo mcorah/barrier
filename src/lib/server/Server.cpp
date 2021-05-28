@@ -43,14 +43,13 @@
 #include "base/IEventQueue.h"
 #include "base/Log.h"
 #include "base/TMethodEventJob.h"
-#include "common/stdexcept.h"
 
 #include <cstring>
 #include <cstdlib>
 #include <sstream>
 #include <fstream>
 #include <ctime>
-
+#include <stdexcept>
 //
 // Server
 //
@@ -101,7 +100,7 @@ Server::Server(
 	assert(config.isScreen(primaryClient->getName()));
 	assert(m_screen != NULL);
 
-	String primaryName = getName(primaryClient);
+    std::string primaryName = getName(primaryClient);
 
 	// clear clipboards
 	for (ClipboardID id = 0; id < kClipboardEnd; ++id) {
@@ -163,6 +162,10 @@ Server::Server(
 							m_inputFilter,
 							new TMethodEventJob<Server>(this,
 								&Server::handleSwitchToScreenEvent));
+  m_events->adoptHandler(m_events->forServer().toggleScreen(),
+              m_inputFilter,
+              new TMethodEventJob<Server>(this,
+                &Server::handleToggleScreenEvent));
 	m_events->adoptHandler(m_events->forServer().switchInDirection(),
 							m_inputFilter,
 							new TMethodEventJob<Server>(this,
@@ -370,7 +373,7 @@ Server::getNumClients() const
 }
 
 void
-Server::getClients(std::vector<String>& list) const
+Server::getClients(std::vector<std::string>& list) const
 {
 	list.clear();
 	for (ClientList::const_iterator index = m_clients.begin();
@@ -379,10 +382,9 @@ Server::getClients(std::vector<String>& list) const
 	}
 }
 
-String
-Server::getName(const BaseClientProxy* client) const
+std::string Server::getName(const BaseClientProxy* client) const
 {
-	String name = m_config->getCanonicalName(client->getName());
+    std::string name = m_config->getCanonicalName(client->getName());
 	if (name.empty()) {
 		name = client->getName();
 	}
@@ -600,7 +602,7 @@ Server::getNeighbor(BaseClientProxy* src,
 	assert(src != NULL);
 
 	// get source screen name
-	String srcName = getName(src);
+    std::string srcName = getName(src);
 	assert(!srcName.empty());
 	LOG((CLOG_DEBUG2 "find neighbor on %s of \"%s\"", Config::dirName(dir), srcName.c_str()));
 
@@ -610,7 +612,7 @@ Server::getNeighbor(BaseClientProxy* src,
 	// search for the closest neighbor that exists in direction dir
 	float tTmp;
 	for (;;) {
-		String dstName(m_config->getNeighbor(srcName, dir, t, &tTmp));
+        std::string dstName(m_config->getNeighbor(srcName, dir, t, &tTmp));
 
 		// if nothing in that direction then return NULL. if the
 		// destination is the source then we can make no more
@@ -755,7 +757,7 @@ Server::avoidJumpZone(BaseClientProxy* dst,
 		return;
 	}
 
-	const String dstName(getName(dst));
+    const std::string dstName(getName(dst));
 	SInt32 dx, dy, dw, dh;
 	dst->getShape(dx, dy, dw, dh);
 	float t = mapToFraction(dst, dir, x, y);
@@ -1408,6 +1410,24 @@ Server::handleSwitchToScreenEvent(const Event& event, void*)
 }
 
 void
+Server::handleToggleScreenEvent(const Event& event, void*)
+{
+  std::string current = getName(m_active);
+  ClientList::const_iterator index = m_clients.find(current);
+  if (index == m_clients.end()) {
+    LOG((CLOG_DEBUG1 "screen \"%s\" not active", current.c_str()));
+  }
+  else {
+    ++index;
+    if (index == m_clients.end()) {
+      index = m_clients.begin();
+    }
+    jumpToScreen(index->second);
+  }
+}
+
+
+void
 Server::handleSwitchInDirectionEvent(const Event& event, void*)
 {
 	SwitchInDirectionInfo* info =
@@ -1533,7 +1553,7 @@ Server::onClipboardChanged(BaseClientProxy* sender,
 	sender->getClipboard(id, &clipboard.m_clipboard);
 
 	// ignore if data hasn't changed
-	String data = clipboard.m_clipboard.marshall();
+    std::string data = clipboard.m_clipboard.marshall();
 	if (data == clipboard.m_clipboardData) {
 		LOG((CLOG_DEBUG "ignored screen \"%s\" update of clipboard %d (unchanged)", clipboard.m_clipboardOwner.c_str(), id));
 		return;
@@ -1703,7 +1723,7 @@ Server::onMouseUp(ButtonID id)
 
 	if (m_args.m_enableDragDrop) {
 		if (!m_screen->isOnScreen()) {
-			String& file = m_screen->getDraggingFilename();
+            std::string& file = m_screen->getDraggingFilename();
 			if (!file.empty()) {
 				sendFileToClient(file.c_str());
 			}
@@ -1829,7 +1849,7 @@ Server::sendDragInfoThread(void* arg)
 	BaseClientProxy* newScreen = static_cast<BaseClientProxy*>(arg);
 
 	m_dragFileList.clear();
-	String& dragFileList = m_screen->getDraggingFilename();
+    std::string& dragFileList = m_screen->getDraggingFilename();
 	if (!dragFileList.empty()) {
 		DragInformation di;
 		di.setFilename(dragFileList);
@@ -1856,7 +1876,7 @@ Server::sendDragInfoThread(void* arg)
 void
 Server::sendDragInfo(BaseClientProxy* newScreen)
 {
-	String infoString;
+    std::string infoString;
 	UInt32 fileCount = DragInformation::setupDragInfo(m_dragFileList, infoString);
 
 	if (fileCount > 0) {
@@ -2089,7 +2109,7 @@ Server::writeToDropDirThread(void*)
 bool
 Server::addClient(BaseClientProxy* client)
 {
-	String name = getName(client);
+    std::string name = getName(client);
 	if (m_clients.count(name) != 0) {
 		return false;
 	}
@@ -2313,7 +2333,7 @@ Server::LockCursorToScreenInfo::alloc(State state)
 //
 
 Server::SwitchToScreenInfo*
-Server::SwitchToScreenInfo::alloc(const String& screen)
+Server::SwitchToScreenInfo::alloc(const std::string& screen)
 {
 	SwitchToScreenInfo* info =
 		(SwitchToScreenInfo*)malloc(sizeof(SwitchToScreenInfo) +
@@ -2351,7 +2371,7 @@ Server::KeyboardBroadcastInfo::alloc(State state)
 }
 
 Server::KeyboardBroadcastInfo*
-Server::KeyboardBroadcastInfo::alloc(State state, const String& screens)
+Server::KeyboardBroadcastInfo::alloc(State state, const std::string& screens)
 {
 	KeyboardBroadcastInfo* info =
 		(KeyboardBroadcastInfo*)malloc(sizeof(KeyboardBroadcastInfo) +
@@ -2396,7 +2416,7 @@ Server::sendFileThread(void* data)
 }
 
 void
-Server::dragInfoReceived(UInt32 fileNum, String content)
+Server::dragInfoReceived(UInt32 fileNum, std::string content)
 {
 	if (!m_args.m_enableDragDrop) {
 		LOG((CLOG_DEBUG "drag drop not enabled, ignoring drag info."));

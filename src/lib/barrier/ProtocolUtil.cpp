@@ -20,6 +20,7 @@
 #include "io/IStream.h"
 #include "base/Log.h"
 #include "common/stdvector.h"
+#include "base/String.h"
 
 #include <cctype>
 #include <cstring>
@@ -538,7 +539,7 @@ ProtocolUtil::read(barrier::IStream* stream, void* vbuffer, UInt32 count)
 //
 
 String
-XIOReadMismatch::getWhat() const throw()
+XIOReadMismatch::getWhat() const noexcept
 {
     return format("XIOReadMismatch", "ProtocolUtil::readf() mismatch");
 }

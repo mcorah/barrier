@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 3.4)
 
-find_package (Qt5 COMPONENTS Core Widgets Network)
+find_package (Qt5 REQUIRED COMPONENTS Core Widgets Network)
 set (CMAKE_AUTOMOC ON)
 set (CMAKE_AUTORCC ON)
 set (CMAKE_AUTOUIC ON)
@@ -48,6 +48,6 @@ target_link_libraries (barrier common)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     install (TARGETS barrier DESTINATION ${BARRIER_BUNDLE_BINARY_DIR})
-elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux" OR ${CMAKE_SYSTEM_NAME} MATCHES "BSD")
     install (TARGETS barrier DESTINATION bin)
 endif()

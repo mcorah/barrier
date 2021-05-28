@@ -18,8 +18,8 @@
 
 #pragma once
 
-#include "base/String.h"
-#include "common/stdexcept.h"
+#include <stdexcept>
+#include <string>
 
 //! Exception base class
 /*!
@@ -30,15 +30,15 @@ public:
     //! Use getWhat() as the result of what()
     XBase();
     //! Use \c msg as the result of what()
-    XBase(const String& msg);
-    virtual ~XBase() _NOEXCEPT;
+    XBase(const std::string& msg);
+    virtual ~XBase() noexcept;
 
     //! Reason for exception
-    virtual const char* what() const _NOEXCEPT;
+    virtual const char* what() const noexcept;
 
 protected:
     //! Get a human readable string describing the exception
-    virtual String        getWhat() const throw() { return ""; }
+    virtual std::string getWhat() const noexcept { return ""; }
 
     //! Format a string
     /*!
@@ -46,47 +46,46 @@ protected:
     no format can be found, then replaces positional parameters in
     the format string and returns the result.
     */
-    virtual String        format(const char* id,
-                            const char* defaultFormat, ...) const throw();
+    virtual std::string format(const char* id, const char* defaultFormat, ...) const noexcept;
 private:
-    mutable String        m_what;
+    mutable std::string        m_what;
 };
 
 /*!
 \def XBASE_SUBCLASS
 Convenience macro to subclass from XBase (or a subclass of it),
-providing the c'tor taking a const String&.  getWhat() is not
+providing the c'tor taking a const std::string&.  getWhat() is not
 declared.
 */
 #define XBASE_SUBCLASS(name_, super_)                                    \
 class name_ : public super_ {                                            \
 public:                                                                    \
     name_() : super_() { }                                                \
-    name_(const String& msg) : super_(msg) { }                            \
-    virtual ~name_() _NOEXCEPT { }                                        \
+    name_(const std::string& msg) : super_(msg) { }                            \
+    virtual ~name_() noexcept { }                                        \
 }
 
 /*!
 \def XBASE_SUBCLASS
 Convenience macro to subclass from XBase (or a subclass of it),
-providing the c'tor taking a const String&.  getWhat() must be
+providing the c'tor taking a const std::string&.  getWhat() must be
 implemented.
 */
 #define XBASE_SUBCLASS_WHAT(name_, super_)                                \
 class name_ : public super_ {                                            \
 public:                                                                    \
     name_() : super_() { }                                                \
-    name_(const String& msg) : super_(msg) { }                            \
-    virtual ~name_() _NOEXCEPT { }                                        \
+    name_(const std::string& msg) : super_(msg) { }                            \
+    virtual ~name_() noexcept { }                                        \
                                                                         \
 protected:                                                                \
-    virtual String        getWhat() const throw();                        \
+    virtual std::string getWhat() const noexcept;                        \
 }
 
 /*!
 \def XBASE_SUBCLASS_FORMAT
 Convenience macro to subclass from XBase (or a subclass of it),
-providing the c'tor taking a const String&.  what() is overridden
+providing the c'tor taking a const std::string&.  what() is overridden
 to call getWhat() when first called;  getWhat() can format the
 error message and can call what() to get the message passed to the
 c'tor.
@@ -98,10 +97,10 @@ private:                                                                \
                                                                         \
 public:                                                                    \
     name_() : super_(), m_state(kDone) { }                                \
-    name_(const String& msg) : super_(msg), m_state(kFirst) { }        \
-    virtual ~name_() _NOEXCEPT { }                                        \
+    name_(const std::string& msg) : super_(msg), m_state(kFirst) { }        \
+    virtual ~name_() noexcept { }                                        \
                                                                         \
-    virtual const char*    what() const _NOEXCEPT                            \
+    virtual const char* what() const noexcept                            \
     {                                                                    \
         if (m_state == kFirst) {                                        \
             m_state = kFormat;                                            \
@@ -117,7 +116,7 @@ public:                                                                    \
     }                                                                    \
                                                                         \
 protected:                                                                \
-    virtual String        getWhat() const throw();                        \
+    virtual std::string getWhat() const noexcept;                        \
                                                                         \
 private:                                                                \
     mutable EState                m_state;                                \

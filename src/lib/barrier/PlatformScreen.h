@@ -20,7 +20,7 @@
 
 #include "barrier/IPlatformScreen.h"
 #include "barrier/DragInformation.h"
-#include "common/stdexcept.h"
+#include <stdexcept>
 
 //! Base screen implementation
 /*!

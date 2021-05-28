@@ -20,7 +20,6 @@
 
 #include "io/XIO.h"
 #include "base/XBase.h"
-#include "base/String.h"
 #include "common/basic_types.h"
 
 //! Generic socket exception
@@ -41,28 +40,28 @@ public:
         kBadPort        //!< The port is invalid
     };
 
-    XSocketAddress(EError, const String& hostname, int port) _NOEXCEPT;
-    virtual ~XSocketAddress() _NOEXCEPT { }
+    XSocketAddress(EError, const std::string& hostname, int port) noexcept;
+    virtual ~XSocketAddress() noexcept { }
 
     //! @name accessors
     //@{
 
     //! Get the error code
-    EError                getError() const throw();
+    EError getError() const noexcept;
     //! Get the hostname
-    String                getHostname() const throw();
+    std::string getHostname() const noexcept;
     //! Get the port
-    int                    getPort() const throw();
+    int getPort() const noexcept;
 
     //@}
 
 protected:
     // XBase overrides
-    virtual String        getWhat() const throw();
+    virtual std::string getWhat() const noexcept;
 
 private:
     EError                m_error;
-    String                m_hostname;
+    std::string m_hostname;
     int                    m_port;
 };
 

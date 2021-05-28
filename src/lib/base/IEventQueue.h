@@ -20,7 +20,7 @@
 
 #include "common/IInterface.h"
 #include "base/Event.h"
-#include "base/String.h"
+#include <string>
 
 class IEventJob;
 class IEventQueueBuffer;
@@ -189,13 +189,6 @@ public:
     //! @name accessors
     //@{
 
-    //! Test if queue is empty
-    /*!
-    Returns true iff the queue has no events in it, including timer
-    events.
-    */
-    virtual bool        isEmpty() const = 0;
-
     //! Get an event handler
     /*!
     Finds and returns the event handler for the \p type, \p target pair
@@ -214,7 +207,7 @@ public:
     /*!
     Returns the registered type for an event for a given name.
     */
-    virtual Event::Type getRegisteredType(const String& name) const = 0;
+    virtual Event::Type getRegisteredType(const std::string& name) const = 0;
 
     //! Get the system event type target
     /*!
